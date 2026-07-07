@@ -27,5 +27,26 @@ if ($path === '/') {
 }
 if ($path === '/projects') { $projects=$pdo->query('SELECT * FROM projects ORDER BY name')->fetchAll(); view('projects/index', compact('projects')); exit; }
 if ($path === '/projects/create' && $_SERVER['REQUEST_METHOD']==='POST') { csrf_verify(); $stmt=$pdo->prepare("INSERT INTO projects(name,description,status) VALUES(?,?,?)"); $stmt->execute([$_POST['name'], $_POST['description']??null, 'active']); $pid=$pdo->lastInsertId(); $stmt=$pdo->prepare('INSERT INTO dispatch_centers(project_id,name) VALUES(?,?)'); $stmt->execute([$pid, $_POST['dispatch_center'] ?: 'Leitstelle']); redirect('/projects'); }
+
+if ($path === '/system') {
+    $checks = [
+        ['label' => 'Wachplaner Version', 'value' => '0.2.0-dev Sprint 1', 'ok' => true],
+        ['label' => 'PHP Version', 'value' => PHP_VERSION, 'ok' => version_compare(PHP_VERSION, '8.1.0', '>=')],
+        ['label' => 'PDO MySQL', 'value' => extension_loaded('pdo_mysql') ? 'verfügbar' : 'nicht verfügbar', 'ok' => extension_loaded('pdo_mysql')],
+        ['label' => 'Storage beschreibbar', 'value' => is_writable(__DIR__.'/../storage') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage')],
+        ['label' => 'Cache beschreibbar', 'value' => is_writable(__DIR__.'/../storage/cache') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage/cache')],
+        ['label' => 'Logs beschreibbar', 'value' => is_writable(__DIR__.'/../storage/logs') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage/logs')],
+    ];
+    $counts = [
+        'Fahrzeugtypen' => (int)$pdo->query('SELECT COUNT(*) FROM vehicle_types')->fetchColumn(),
+        'Ausbildungen' => (int)$pdo->query('SELECT COUNT(*) FROM training_types')->fetchColumn(),
+        'Erweiterungen' => (int)$pdo->query('SELECT COUNT(*) FROM expansions')->fetchColumn(),
+        'Baukosten' => (int)$pdo->query('SELECT COUNT(*) FROM station_build_costs')->fetchColumn(),
+        'Projekte' => (int)$pdo->query('SELECT COUNT(*) FROM projects')->fetchColumn(),
+    ];
+    view('system/index', compact('checks', 'counts'));
+    exit;
+}
+
 if ($path === '/masterdata') { $vehicleTypes=$pdo->query('SELECT * FROM vehicle_types ORDER BY category,name LIMIT 250')->fetchAll(); $expansions=$pdo->query('SELECT * FROM expansions ORDER BY station_type,name')->fetchAll(); $trainings=$pdo->query('SELECT * FROM training_types ORDER BY organisation,name')->fetchAll(); view('masterdata/index', compact('vehicleTypes','expansions','trainings')); exit; }
 http_response_code(404); echo '404';
