@@ -1,22 +1,23 @@
-# Wachplaner Projektstand
+# Wachplaner
 
-## Version
-V0.1 Realbau Edition
+Realbau Planungs- und Controllingsystem für Leitstellenspiel.de.
 
-## Ziel
-Planung realer Wachen mit realer Fahrzeugbesetzung für Leitstellenspiel.de.
+## Aktuelle stabile Basis
 
-## Erledigt
-- Grundstruktur
-- Stammdatenmodell
-- Fahrzeugtypen importiert
-- Ausbildungen importiert
-- Erweiterungen importiert
-- Baukosten importiert
-- Projektverwaltung
+Version: 0.1.2
 
-## Nächste Schritte
-- Wachen in Projekten anlegen
-- Sollfahrzeuge je Wache planen
-- Kosten automatisch summieren
-- LSS-API in V0.2 anbinden
+## Aktueller Entwicklungszweig
+
+Version: 0.2.0-dev
+
+## Fokus 0.2.0
+
+- Dokumentation professionalisieren
+- Service-Struktur vorbereiten
+- LSS-Login und Sessionverwaltung planen
+- JSON-Cache vorbereiten
+- Sync-Logging vorbereiten
+
+## Nicht-Ziel
+
+Dienstplanung ist kein Bestandteil des Projekts.

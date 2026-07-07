@@ -1,0 +1,15 @@
+{
+  "name": "einfachdommi/wachplaner",
+  "description": "Realbau Planungs- und Controllingsystem fuer Leitstellenspiel.de",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": ">=8.1",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wachplaner\\": "app/"
+    }
+  }
+}
