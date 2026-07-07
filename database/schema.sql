@@ -80330,4 +80330,15 @@ INSERT INTO app_meta (meta_key,meta_value) VALUES ('vehicle_data_count',201) ON 
 INSERT INTO app_meta (meta_key,meta_value) VALUES ('training_data_count',12) ON DUPLICATE KEY UPDATE meta_value=VALUES(meta_value);
 INSERT INTO app_meta (meta_key,meta_value) VALUES ('expansion_data_count',68) ON DUPLICATE KEY UPDATE meta_value=VALUES(meta_value);
 INSERT INTO app_meta (meta_key,meta_value) VALUES ('station_cost_rows',80000) ON DUPLICATE KEY UPDATE meta_value=VALUES(meta_value);
-INSERT INTO app_meta (meta_key,meta_value) VALUES ('domain','http://wachplaner.sh-com.de') ON DUPLICATE KEY UPDATE meta_value=VALUES(meta_value);
+INSERT INTO app_meta (meta_key,meta_value) VALUES ('domain','http://wachplaner.sh-com.de') ON DUPLICATE KEY UPDATE meta_value=VALUES(meta_value);CREATE TABLE IF NOT EXISTS masterdata_import_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    import_type VARCHAR(80) NOT NULL,
+    file_name VARCHAR(255) NULL,
+    processed INT NOT NULL DEFAULT 0,
+    created_count INT NOT NULL DEFAULT 0,
+    updated_count INT NOT NULL DEFAULT 0,
+    skipped_count INT NOT NULL DEFAULT 0,
+    error_count INT NOT NULL DEFAULT 0,
+    errors_json JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

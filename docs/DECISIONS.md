@@ -31,3 +31,30 @@ Dieses Dokument hält wichtige fachliche und technische Entscheidungen fest.
 **Entscheidung:** V0.1.2 bleibt als stabile Basis bestehen. Neue Entwicklung erfolgt ab V0.2 über Git und Sprints.
 
 **Begründung:** So bleibt ein funktionierender Rückfallstand erhalten.
+
+## ADR-0001 – Fahrzeugtypen sind primäre Realbau-Stammdaten
+
+**Status:** Akzeptiert  
+**Datum:** 2026-07-07
+
+Die Fahrzeugtypen aus dem Leitstellenspiel werden im Wachplaner als primäre Fahrzeug-Stammdaten verwendet. Es wird keine zusätzliche Tabelle `vehicle_types_real` eingeführt.
+
+### Begründung
+
+- Die aktuell verwendeten Fahrzeugklassen sind für den geplanten Realbau-Ansatz ausreichend realitätsnah.
+- Eine zusätzliche Mapping-Ebene würde die Stammdatenpflege unnötig erschweren.
+- Der spätere Soll-/Ist-Abgleich kann direkt gegen die LSS-Fahrzeugtypen erfolgen.
+- Fahrzeugdaten haben damit genau eine fachliche Quelle.
+
+## ADR-0002 – Stammdaten werden nicht mehr fest in Migrationen gepflegt
+
+**Status:** Akzeptiert  
+**Datum:** 2026-07-07
+
+Migrationen erstellen künftig Tabellen und technische Strukturen. Fachliche Stammdaten werden über Importer aus Excel-Dateien gepflegt.
+
+### Begründung
+
+- Änderungen an Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten sollen ohne SQL-Bearbeitung möglich sein.
+- Die Excel-Dateien bleiben die fachliche Single Source of Truth.
+- Updates durch neue Leitstellenspiel-Inhalte werden einfacher nachvollziehbar.

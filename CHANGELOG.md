@@ -28,3 +28,16 @@
 - Root-`.htaccess` leitet auf `public/`
 - Admin-Registrierung stabilisiert
 - Stammdaten in Datenbank hinterlegt
+
+## V0.2.0-dev – Sprint 2 Atlas
+
+### Neu
+
+- Masterdata-Engine eingeführt.
+- XLSX-Reader ohne zusätzliche Composer-Abhängigkeit ergänzt.
+- Importer für Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten vorbereitet.
+- Adminseite `/admin/masterdata` für Stammdatenimporte ergänzt.
+- CLI-Import `scripts/import_masterdata.php` ergänzt.
+- Import-Logging mit Tabelle `masterdata_import_logs` ergänzt.
+- Dokumentation um `SPRINTS.md` und `VISION.md` erweitert.
+- Architekturentscheidungen zu Fahrzeugtypen und Stammdatenpflege dokumentiert.

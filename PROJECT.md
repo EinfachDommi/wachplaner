@@ -39,3 +39,17 @@ Ziel: Repository und Codebasis für die Entwicklung ab V0.2 professionalisieren.
 ### Nächster Sprint
 
 Masterdata-Importer und Planning-Service vorbereiten.
+
+## Aktueller Sprint: Sprint 2 – Atlas / Masterdata Foundation
+
+Ziel: Stammdaten werden künftig über Importer gepflegt. Die Excel-Dateien für Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten werden zur fachlichen Quelle der Stammdaten.
+
+### Erledigt in diesem Zwischenstand
+
+- Masterdata-Service-Struktur
+- XLSX-Reader
+- Importer-Klassen
+- Admin-Importseite
+- CLI-Import
+- Import-Logging
+- Dokumentation der Architekturentscheidungen
