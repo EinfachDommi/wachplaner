@@ -58,3 +58,29 @@ Migrationen erstellen künftig Tabellen und technische Strukturen. Fachliche Sta
 - Änderungen an Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten sollen ohne SQL-Bearbeitung möglich sein.
 - Die Excel-Dateien bleiben die fachliche Single Source of Truth.
 - Updates durch neue Leitstellenspiel-Inhalte werden einfacher nachvollziehbar.
+
+## ADR-0003 – Keine ungefangenen technischen Fehler im Browser
+
+**Status:** Akzeptiert  
+**Datum:** 2026-07-08
+
+Technische Fehler dürfen nicht als PHP-Fatal-Error oder Stacktrace im Browser erscheinen. Der Wachplaner zeigt stattdessen eine verständliche Fehlerseite mit Fehlercode und Fehler-ID. Details werden unter `storage/logs/` protokolliert.
+
+### Begründung
+
+- Produktive Systeme dürfen keine internen Pfade, SQL-Details oder Stacktraces offenlegen.
+- Fehler-IDs erleichtern Support und Fehlersuche.
+- DEV und PROD verhalten sich konsistenter.
+
+## ADR-0004 – Upgrade-Migrationen laufen ohne PDO-Transaktion
+
+**Status:** Akzeptiert  
+**Datum:** 2026-07-08
+
+SQL-Upgrades werden bei MySQL/MariaDB ohne explizite PDO-Transaktion ausgeführt.
+
+### Begründung
+
+- DDL-Statements wie `CREATE TABLE` und `ALTER TABLE` lösen implizite Commits aus.
+- Explizite Transaktionen können dadurch mit `There is no active transaction` fehlschlagen.
+- Migrationen werden stattdessen einzeln protokolliert und nach erfolgreicher Ausführung in `system_migrations` eingetragen.

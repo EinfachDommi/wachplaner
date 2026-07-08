@@ -32,6 +32,33 @@ final class Config
         return $value;
     }
 
+    /**
+     * @param array<int, string> $keys
+     * @return array<int, string>
+     */
+    public static function missing(array $keys): array
+    {
+        $missing = [];
+        foreach ($keys as $key) {
+            $value = self::get($key);
+            if ($value === null || $value === '') {
+                $missing[] = $key;
+            }
+        }
+        return $missing;
+    }
+
+    /**
+     * @param array<int, string> $keys
+     */
+    public static function assert(array $keys): void
+    {
+        $missing = self::missing($keys);
+        if ($missing !== []) {
+            throw new RuntimeException('Konfiguration unvollständig: ' . implode(', ', $missing), 1001);
+        }
+    }
+
     public static function all(): array
     {
         return self::$config;

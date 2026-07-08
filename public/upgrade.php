@@ -4,7 +4,8 @@ require_once __DIR__ . '/../app/Core/bootstrap.php';
 require_auth();
 
 $pdo = Database::pdo();
-$runner = new \Wachplaner\Services\UpgradeRunner($pdo, __DIR__ . '/../database/upgrades');
+$logger = new \Wachplaner\Services\Logging\Logger(WACHPLANER_ROOT . '/storage/logs');
+$runner = new \Wachplaner\Services\UpgradeRunner($pdo, __DIR__ . '/../database/upgrades', $logger);
 $pending = $runner->pending();
 $results = [];
 $finished = false;
@@ -20,6 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = $result['message'] ?? 'Upgrade fehlgeschlagen.';
             break;
         }
+    }
+    if ($error === null) {
+        @file_put_contents(WACHPLANER_ROOT . '/storage/version.json', json_encode([
+            'version' => Config::get('version.number'),
+            'codename' => Config::get('version.codename'),
+            'build' => Config::get('version.build'),
+            'branch' => Config::get('app_env') === 'development' ? 'develop' : 'main',
+            'updated_at' => date('c'),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }
 

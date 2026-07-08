@@ -4,16 +4,19 @@ namespace Wachplaner\Services;
 
 use PDO;
 use Throwable;
+use Wachplaner\Services\Logging\Logger;
 
 class UpgradeRunner
 {
     private PDO $pdo;
     private string $upgradePath;
+    private ?Logger $logger;
 
-    public function __construct(PDO $pdo, string $upgradePath)
+    public function __construct(PDO $pdo, string $upgradePath, ?Logger $logger = null)
     {
         $this->pdo = $pdo;
         $this->upgradePath = rtrim($upgradePath, '/');
+        $this->logger = $logger;
     }
 
     public function ensureMigrationTable(): void
@@ -48,19 +51,25 @@ class UpgradeRunner
             $file = $this->upgradePath . '/' . $migration;
             $sql = file_get_contents($file);
             $start = microtime(true);
+            $this->logger?->info('Upgrade migration started', ['migration' => $migration], 'upgrade');
 
             try {
-                $this->pdo->beginTransaction();
+                // MySQL/MariaDB DDL statements like CREATE/ALTER TABLE may issue implicit commits.
+                // Therefore upgrade SQL migrations are executed without an explicit PDO transaction.
                 $this->pdo->exec($sql);
+
                 $duration = (int)round((microtime(true) - $start) * 1000);
                 $stmt = $this->pdo->prepare('INSERT INTO system_migrations (migration, duration_ms) VALUES (?, ?)');
                 $stmt->execute([$migration, $duration]);
-                $this->pdo->commit();
+
+                $this->logger?->info('Upgrade migration completed', ['migration' => $migration, 'duration_ms' => $duration], 'upgrade');
                 $results[] = ['migration' => $migration, 'status' => 'success', 'duration_ms' => $duration];
             } catch (Throwable $e) {
                 if ($this->pdo->inTransaction()) {
                     $this->pdo->rollBack();
                 }
+
+                $this->logger?->error('Upgrade migration failed', ['migration' => $migration, 'error' => $e->getMessage()], 'upgrade');
                 $results[] = ['migration' => $migration, 'status' => 'error', 'message' => $e->getMessage()];
                 break;
             }

@@ -69,3 +69,22 @@ Ziel: Atlas stabilisieren, bevor neue Features wie die Leitstellenspiel-Synchron
 - `.env` auf DEV mit `.env.example` abgleichen
 - `/upgrade` ausführen
 - `/system` prüfen
+
+## V0.2.1 Atlas Quality Layer
+
+Ziel: Atlas vor neuen Features weiter härten.
+
+### Erledigt
+- `DB_PORT` in Datenbankverbindung aufgenommen.
+- Fehler-ID für ErrorHandler ergänzt.
+- Mehrkanal-Logger ergänzt.
+- Upgrade-Logging ergänzt.
+- SystemCheckService eingeführt.
+- Qualitätsdokumentation ergänzt.
+- Known-Bugs-Liste eingeführt.
+
+### DEV-Abnahme
+- `/system` prüfen.
+- `/upgrade` erneut ausführen.
+- `storage/logs/upgrade.log` prüfen.
+- Fehlerseite optional durch fehlerhafte `.env` auf DEV testen und danach `.env` wieder korrigieren.

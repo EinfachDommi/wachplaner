@@ -68,3 +68,27 @@
 - Upgrade-Migration `20260708_0201_atlas_hotfix.sql` für Versions-/Build-Metadaten.
 - `storage/version.json` als lokale Versionsinformation.
 - `docs/COMMITS.md` mit GitHub-Desktop-Commitvorlage.
+
+
+## V0.2.1 Hotfix Patch
+
+### Fixed
+- UpgradeRunner führt SQL-Migrationen ohne explizite PDO-Transaktion aus, da MySQL/MariaDB DDL-Statements implizite Commits auslösen können.
+- Fehler `There is no active transaction` beim Aufruf von `/upgrade` behoben.
+
+## V0.2.1 – Atlas Quality Layer
+
+### Fixed
+- `DB_PORT` wird jetzt aus `.env` berücksichtigt.
+- Systemstatus nutzt einen eigenen `SystemCheckService` statt verstreuter Inline-Prüfungen.
+- Upgrade-Läufe schreiben zusätzlich in `storage/logs/upgrade.log`.
+
+### Changed
+- Fehlerseiten enthalten jetzt eine eindeutige Fehler-ID zur Log-Zuordnung.
+- Config kann Pflichtwerte zentral validieren.
+- Logger unterstützt mehrere Kanäle (`app`, `upgrade`, später `lss`).
+- `storage/version.json` wird nach erfolgreichen Upgrades aktualisiert.
+
+### Added
+- `docs/QUALITY.md` mit Qualitätsregeln, Fehlercodes und DEV-Abnahmetest.
+- `docs/KNOWN_BUGS.md` als zentrale Bugliste.

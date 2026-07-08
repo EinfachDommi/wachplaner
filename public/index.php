@@ -33,17 +33,8 @@ if ($path === '/projects') { $projects=$pdo->query('SELECT * FROM projects ORDER
 if ($path === '/projects/create' && $_SERVER['REQUEST_METHOD']==='POST') { csrf_verify(); $stmt=$pdo->prepare("INSERT INTO projects(name,description,status) VALUES(?,?,?)"); $stmt->execute([$_POST['name'], $_POST['description']??null, 'active']); $pid=$pdo->lastInsertId(); $stmt=$pdo->prepare('INSERT INTO dispatch_centers(project_id,name) VALUES(?,?)'); $stmt->execute([$pid, $_POST['dispatch_center'] ?: 'Leitstelle']); redirect('/projects'); }
 
 if ($path === '/system') {
-    $checks = [
-        ['label' => 'Wachplaner Version', 'value' => Config::get('version.number') . ' ' . Config::get('version.codename'), 'ok' => true],
-        ['label' => 'Build', 'value' => Config::get('version.build'), 'ok' => true],
-        ['label' => 'Umgebung', 'value' => Config::get('app_env'), 'ok' => true],
-        ['label' => '.env gefunden', 'value' => EnvLoader::exists(WACHPLANER_ROOT) ? 'ja' : 'nein', 'ok' => EnvLoader::exists(WACHPLANER_ROOT)],
-        ['label' => 'PHP Version', 'value' => PHP_VERSION, 'ok' => version_compare(PHP_VERSION, '8.1.0', '>=')],
-        ['label' => 'PDO MySQL', 'value' => extension_loaded('pdo_mysql') ? 'verfügbar' : 'nicht verfügbar', 'ok' => extension_loaded('pdo_mysql')],
-        ['label' => 'Storage beschreibbar', 'value' => is_writable(__DIR__.'/../storage') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage')],
-        ['label' => 'Cache beschreibbar', 'value' => is_writable(__DIR__.'/../storage/cache') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage/cache')],
-        ['label' => 'Logs beschreibbar', 'value' => is_writable(__DIR__.'/../storage/logs') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage/logs')],
-    ];
+    $systemCheck = new \Wachplaner\Services\System\SystemCheckService(WACHPLANER_ROOT);
+    $checks = $systemCheck->checks($pdo);
     $counts = [
         'Fahrzeugtypen' => (int)$pdo->query('SELECT COUNT(*) FROM vehicle_types')->fetchColumn(),
         'Ausbildungen' => (int)$pdo->query('SELECT COUNT(*) FROM training_types')->fetchColumn(),
