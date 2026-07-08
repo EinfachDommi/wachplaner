@@ -41,3 +41,13 @@
 - Import-Logging mit Tabelle `masterdata_import_logs` ergänzt.
 - Dokumentation um `SPRINTS.md` und `VISION.md` erweitert.
 - Architekturentscheidungen zu Fahrzeugtypen und Stammdatenpflege dokumentiert.
+
+## 0.2.0-dev Atlas Upgrade-Flow
+
+### Added
+- Added `/upgrade` route for existing installations.
+- Added `UpgradeRunner` with tracked SQL upgrade migrations.
+- Added `database/upgrades/20260708_0200_atlas_masterdata.sql`.
+
+### Changed
+- Existing DEV installations should be updated through `/upgrade` instead of `/install`.
