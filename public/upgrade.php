@@ -58,7 +58,7 @@ try {
                 <div class="col-md-6">
                     <div class="border rounded p-3 bg-white">
                         <div class="small text-muted">Zielversion</div>
-                        <strong>0.2.0-dev Atlas</strong>
+                        <strong><?= e(Config::get('version.number')) ?> <?= e(Config::get('version.codename')) ?></strong>
                     </div>
                 </div>
             </div>

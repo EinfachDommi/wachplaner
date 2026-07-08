@@ -53,3 +53,19 @@ Ziel: Stammdaten werden künftig über Importer gepflegt. Die Excel-Dateien für
 - CLI-Import
 - Import-Logging
 - Dokumentation der Architekturentscheidungen
+
+## Aktueller Fokus: V0.2.1 Atlas Hotfix
+
+Ziel: Atlas stabilisieren, bevor neue Features wie die Leitstellenspiel-Synchronisation gebaut werden.
+
+### Erledigt
+- EnvLoader eingeführt
+- Config-Klasse eingeführt
+- Datenbankfehler abgefangen
+- zentrale Fehlerseite ergänzt
+- Upgrade-Migration für Versionsmetadaten ergänzt
+
+### Nächste Prüfung auf DEV
+- `.env` auf DEV mit `.env.example` abgleichen
+- `/upgrade` ausführen
+- `/system` prüfen

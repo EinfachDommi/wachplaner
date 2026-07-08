@@ -44,3 +44,13 @@ php scripts/migrate.php
 ## Nächste Version
 
 V0.2: Leitstellenspiel-Login, Session-Cookie, JSON-Cache und erster API-Sync.
+
+## Upgrade auf V0.2.1 Atlas Hotfix
+
+1. Dateien auf `dev.wachplaner.sh-com.de` hochladen.
+2. Bestehende `.env` nicht überschreiben.
+3. `.env` mit `.env.example` abgleichen.
+4. `/upgrade` öffnen und Migrationen ausführen.
+5. `/system` öffnen und Systemstatus prüfen.
+
+Wichtig: `.env` muss im Projekt-Root liegen, nicht im `public/`-Ordner.

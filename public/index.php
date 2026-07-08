@@ -1,10 +1,12 @@
 <?php
 require __DIR__.'/../app/Core/bootstrap.php';
-$pdo = Database::pdo();
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = rtrim($path, '/') ?: '/';
 if ($path === '/install') { require __DIR__.'/install.php'; exit; }
 if ($path === '/upgrade') { require __DIR__.'/upgrade.php'; exit; }
+
+$pdo = Database::pdo();
+
 if ($path === '/logout') { session_destroy(); redirect('/login'); }
 if ($path === '/login') {
     if ($_SERVER['REQUEST_METHOD']==='POST') { csrf_verify(); $stmt=$pdo->prepare('SELECT * FROM users WHERE email=? LIMIT 1'); $stmt->execute([$_POST['email']??'']); $u=$stmt->fetch(); if($u && password_verify($_POST['password']??'', $u['password_hash'])){ session_regenerate_id(true); $_SESSION['user']=['id'=>$u['id'],'name'=>$u['name'],'email'=>$u['email'],'role'=>$u['role']]; redirect('/'); } $error='Login fehlgeschlagen.'; }
@@ -32,7 +34,10 @@ if ($path === '/projects/create' && $_SERVER['REQUEST_METHOD']==='POST') { csrf_
 
 if ($path === '/system') {
     $checks = [
-        ['label' => 'Wachplaner Version', 'value' => '0.2.0-dev Sprint 2 Atlas', 'ok' => true],
+        ['label' => 'Wachplaner Version', 'value' => Config::get('version.number') . ' ' . Config::get('version.codename'), 'ok' => true],
+        ['label' => 'Build', 'value' => Config::get('version.build'), 'ok' => true],
+        ['label' => 'Umgebung', 'value' => Config::get('app_env'), 'ok' => true],
+        ['label' => '.env gefunden', 'value' => EnvLoader::exists(WACHPLANER_ROOT) ? 'ja' : 'nein', 'ok' => EnvLoader::exists(WACHPLANER_ROOT)],
         ['label' => 'PHP Version', 'value' => PHP_VERSION, 'ok' => version_compare(PHP_VERSION, '8.1.0', '>=')],
         ['label' => 'PDO MySQL', 'value' => extension_loaded('pdo_mysql') ? 'verfügbar' : 'nicht verfügbar', 'ok' => extension_loaded('pdo_mysql')],
         ['label' => 'Storage beschreibbar', 'value' => is_writable(__DIR__.'/../storage') ? 'ja' : 'nein', 'ok' => is_writable(__DIR__.'/../storage')],

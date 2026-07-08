@@ -51,3 +51,20 @@
 
 ### Changed
 - Existing DEV installations should be updated through `/upgrade` instead of `/install`.
+
+## V0.2.1 – Atlas Hotfix
+
+### Fixed
+- Fehlende oder abweichende `.env`-Dateien erzeugen keine ungefangenen PDO-Fatal-Errors mehr.
+- Datenbankverbindungsfehler werden über eine verständliche Fehlerseite und `storage/logs/app.log` behandelt.
+- `/install` und `/upgrade` werden geroutet, bevor die normale Anwendung eine Datenbankverbindung aufbaut.
+
+### Changed
+- Zentrales Konfigurationssystem mit `EnvLoader` und `Config` eingeführt.
+- `.env.example` als Referenzdatei erweitert.
+- Systemstatus um Version, Build, Umgebung und `.env`-Prüfung erweitert.
+
+### Added
+- Upgrade-Migration `20260708_0201_atlas_hotfix.sql` für Versions-/Build-Metadaten.
+- `storage/version.json` als lokale Versionsinformation.
+- `docs/COMMITS.md` mit GitHub-Desktop-Commitvorlage.
