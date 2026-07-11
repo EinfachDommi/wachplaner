@@ -7,8 +7,8 @@ return [
     'app_url' => getenv('APP_URL') ?: 'http://wachplaner.sh-com.de',
     'version' => [
         'number' => '0.2.1',
-        'codename' => 'Atlas Hotfix',
-        'build' => '20260708.002',
+        'codename' => 'Atlas UI',
+        'build' => '20260711.003',
     ],
     'db' => [
         'host' => getenv('DB_HOST') ?: '',

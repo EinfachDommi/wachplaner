@@ -84,3 +84,15 @@ SQL-Upgrades werden bei MySQL/MariaDB ohne explizite PDO-Transaktion ausgeführt
 - DDL-Statements wie `CREATE TABLE` und `ALTER TABLE` lösen implizite Commits aus.
 - Explizite Transaktionen können dadurch mit `There is no active transaction` fehlschlagen.
 - Migrationen werden stattdessen einzeln protokolliert und nach erfolgreicher Ausführung in `system_migrations` eingetragen.
+
+## ADR-0006 – Bootstrap 5.3 und AdminLTE 4 als UI-Grundlage
+
+**Status:** Akzeptiert
+
+Die Wachplaner-Oberfläche verwendet Bootstrap 5.3 und AdminLTE 4. Das zentrale App-Layout wird nicht mehr pro View dupliziert. Authentifizierungsseiten besitzen ein separates Layout.
+
+**Gründe:**
+- konsistente responsive Oberfläche
+- wiederverwendbare Komponenten
+- vorbereitete Sidebar für kommende Fachmodule
+- geringerer Aufwand für zukünftige Dashboard-, Tabellen- und Formularseiten

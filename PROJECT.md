@@ -88,3 +88,13 @@ Ziel: Atlas vor neuen Features weiter härten.
 - `/upgrade` erneut ausführen.
 - `storage/logs/upgrade.log` prüfen.
 - Fehlerseite optional durch fehlerhafte `.env` auf DEV testen und danach `.env` wieder korrigieren.
+
+## Atlas UI Refactoring
+
+- [x] Bootstrap 5.3 / AdminLTE 4 Grundlayout
+- [x] Responsive Sidebar und Navbar
+- [x] Dashboard-Widgets
+- [x] Auth-Layout
+- [x] Dark-Mode-Vorbereitung
+- [ ] DEV-Abnahmetest
+- [ ] Atlas nach erfolgreichem Test abschließen

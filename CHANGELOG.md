@@ -92,3 +92,21 @@
 ### Added
 - `docs/QUALITY.md` mit Qualitätsregeln, Fehlercodes und DEV-Abnahmetest.
 - `docs/KNOWN_BUGS.md` als zentrale Bugliste.
+
+## V0.2.1 – Atlas UI Refactoring
+
+### Geändert
+- Zentrales Anwendungs- und Auth-Layout auf Bootstrap 5.3 und AdminLTE 4 umgestellt.
+- Responsive Sidebar, Navbar, Breadcrumbs und Versionsfooter eingeführt.
+- Dashboard, Projekte, Stammdaten, Stammdaten-Import und Systemstatus vereinheitlicht.
+- Login und Registrierung auf ein separates AdminLTE-Auth-Layout umgestellt.
+
+### Hinzugefügt
+- Wiederverwendbare Layout-Partialen für Navbar und Sidebar.
+- Vorbereitete Navigation für Planung, Stammdaten, Synchronisation und Administration.
+- Lokaler Hell-/Dunkelmodus-Schalter mit Speicherung im Browser.
+- Bootstrap Icons und ein Wachplaner-spezifisches UI-Stylesheet.
+
+### Behoben
+- Doppelte Layout-Einbindung auf der Systemstatus-Seite entfernt.
+- Views nutzen jetzt zentral den passenden App- oder Auth-Layout-Typ.
