@@ -18,10 +18,13 @@ CREATE TABLE IF NOT EXISTS security_audit_logs (
     KEY idx_security_audit_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO system_settings (`key`, `value`, updated_at)
-VALUES
+INSERT INTO system_settings (
+    setting_key,
+    setting_value,
+    updated_at
+) VALUES
     ('security.registration_mode', 'disabled', NOW()),
     ('security.audit_enabled', '1', NOW())
 ON DUPLICATE KEY UPDATE
-    `value` = VALUES(`value`),
+    setting_value = VALUES(setting_value),
     updated_at = VALUES(updated_at);
