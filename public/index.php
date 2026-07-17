@@ -79,6 +79,20 @@ try {
 
 $manualState = $maintenance->manualState($pdo);
 
+// Apply persisted runtime settings only after the database is available.
+try {
+    $runtimeSettingRepository = new \Wachplaner\Core\Settings\SettingRepository($pdo);
+    $runtimeSettingsService = new \Wachplaner\Core\Settings\SettingsService($runtimeSettingRepository);
+    $runtimeSettings = $runtimeSettingsService->system();
+    $runtimeTimezone = (string) ($runtimeSettings['app_timezone'] ?? 'Europe/Berlin');
+
+    if (in_array($runtimeTimezone, timezone_identifiers_list(), true)) {
+        date_default_timezone_set($runtimeTimezone);
+    }
+} catch (Throwable) {
+    // Guardian must remain operational when optional runtime settings are unavailable.
+}
+
 if ($path === '/system/health') {
     if ($manualState->isManual()) {
         MaintenanceResponder::json(
@@ -328,7 +342,7 @@ if ($path === '/system/maintenance' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         (int) auth_user()['id']
     );
 
-    redirect('/system?saved=1');
+    redirect('/system?tab=maintenance&saved=maintenance');
 }
 
 if ($path === '/system/settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -352,7 +366,7 @@ if ($path === '/system/settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'app_timezone' => $timezone,
             'app_locale' => $locale,
         ], (int) auth_user()['id']);
-        redirect('/system?tab=settings&saved=1');
+        redirect('/system?tab=settings&saved=settings');
     } catch (Throwable $exception) {
         $_SESSION['system_save_error'] = $exception->getMessage();
         redirect('/system?tab=settings');
@@ -368,7 +382,7 @@ if ($path === '/system/feature-flags' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     $submitted = is_array($_POST['flags'] ?? null) ? $_POST['flags'] : [];
     $service->save(array_map(static fn ($value): bool => (bool) $value, $submitted), (int) auth_user()['id']);
 
-    redirect('/system?tab=security&saved=1');
+    redirect('/system?tab=security&saved=features');
 }
 
 if ($path === '/admin/masterdata') {

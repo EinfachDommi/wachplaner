@@ -8,9 +8,9 @@ return [
     'app_debug' => filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOL),
     'app_url' => getenv('APP_URL') ?: 'https://wachplaner.sh-com.de',
     'version' => [
-        'number' => '0.2.2',
+        'number' => '0.2.2-dev',
         'codename' => 'Guardian',
-        'build' => '20260717.001',
+        'build' => '20260717.003',
     ],
     'db' => [
         'host' => getenv('DB_HOST') ?: '',

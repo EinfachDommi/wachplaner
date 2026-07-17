@@ -16,7 +16,14 @@ $healthTone = match ($healthSummary['status'] ?? 'critical') {
 ?>
 
 <?php if (!empty($saved)): ?>
-<div class="alert alert-success d-flex align-items-center" role="alert"><i class="bi bi-check-circle-fill me-2"></i><div>Systemeinstellungen wurden gespeichert.</div></div>
+<?php
+$savedMessage = match ((string) $saved) {
+    'maintenance' => 'Wartungseinstellungen wurden gespeichert.',
+    'features' => 'Feature Flags wurden gespeichert.',
+    default => 'Systemeinstellungen wurden gespeichert.',
+};
+?>
+<div class="alert alert-success d-flex align-items-center" role="alert"><i class="bi bi-check-circle-fill me-2"></i><div><?= e($savedMessage) ?></div></div>
 <?php endif; ?>
 <?php if (!empty($saveError)): ?>
 <div class="alert alert-danger d-flex align-items-center" role="alert"><i class="bi bi-x-octagon-fill me-2"></i><div><?= e($saveError) ?></div></div>
@@ -55,7 +62,7 @@ $healthTone = match ($healthSummary['status'] ?? 'critical') {
 <?php endif; ?>
 
 <?php if ($activeTab === 'logs'): ?>
-<div class="row g-4"><div class="col-xl-4"><div class="card card-outline card-secondary"><div class="card-header"><h2 class="card-title">Logdateien</h2></div><div class="list-group list-group-flush"><?php foreach ($logFiles as $file): ?><div class="list-group-item"><div class="d-flex justify-content-between"><strong><?= e($file['channel']) ?>.log</strong><span><?= number_format($file['size']/1024,1,',','.') ?> KB</span></div><small class="text-body-secondary"><?= $file['modified']?date('d.m.Y H:i:s',$file['modified']):'-' ?></small></div><?php endforeach; ?><?php if ($logFiles===[]): ?><div class="list-group-item text-body-secondary">Keine Logdateien vorhanden.</div><?php endif; ?></div></div></div><div class="col-xl-8"><div class="card card-outline card-primary"><div class="card-header"><h2 class="card-title">Letzte Einträge</h2></div><div class="card-body bg-body-tertiary" style="max-height:600px;overflow:auto"><pre class="small mb-0 text-wrap"><?php foreach ($logs as $entry): ?><span class="badge text-bg-secondary me-2"><?= e($entry['channel']) ?></span><?= e($entry['line']) ?>
+<div class="row g-4"><div class="col-xl-4"><div class="card card-outline card-secondary"><div class="card-header"><h2 class="card-title">Logdateien</h2></div><div class="list-group list-group-flush"><?php foreach ($logFiles as $file): ?><div class="list-group-item"><div class="d-flex justify-content-between"><strong><?= e($file['channel']) ?>.log</strong><span><?= number_format($file['size']/1024,1,',','.') ?> KB</span></div><small class="text-body-secondary"><?= $file['modified']?date('d.m.Y H:i:s',$file['modified']):'-' ?></small></div><?php endforeach; ?><?php if ($logFiles===[]): ?><div class="list-group-item text-body-secondary">Keine Logdateien vorhanden.</div><?php endif; ?></div></div></div><div class="col-xl-8"><div class="card card-outline card-primary"><div class="card-header"><h2 class="card-title">Letzte Einträge</h2></div><div class="card-body bg-body-tertiary" style="max-height:600px;overflow:auto"><pre class="small mb-0 text-wrap"><?php foreach ($logs as $entry): ?><?php $logTone = match ($entry['level'] ?? 'info') { 'error' => 'danger', 'warning' => 'warning', default => 'secondary' }; ?><span class="badge text-bg-<?= e($logTone) ?> me-2"><?= e($entry['channel']) ?></span><?= e($entry['line']) ?>
 <?php endforeach; ?><?php if ($logs===[]): ?>Keine Logeinträge vorhanden.<?php endif; ?></pre></div></div></div></div>
 <?php endif; ?>
 

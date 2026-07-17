@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wachplaner\Services\System;
 
 use PDO;
+use Throwable;
 use Wachplaner\Core\Settings\FeatureFlagService;
 use Wachplaner\Core\Settings\SettingsService;
 use Wachplaner\Core\System\MaintenanceManager;
@@ -44,11 +45,14 @@ final class SystemCenterService
     {
         $critical = 0;
         $warnings = 0;
+        $healthy = 0;
 
         foreach ($checks as $check) {
             if (($check['ok'] ?? false) === true) {
+                $healthy++;
                 continue;
             }
+
             if (($check['critical'] ?? false) === true || ($check['level'] ?? '') === 'error') {
                 $critical++;
             } else {
@@ -60,11 +64,13 @@ final class SystemCenterService
             'status' => $critical > 0 ? 'critical' : ($warnings > 0 ? 'warning' : 'healthy'),
             'critical' => $critical,
             'warnings' => $warnings,
+            'healthy' => $healthy,
             'total' => count($checks),
+            'checked_at' => date(DATE_ATOM),
         ];
     }
 
-    /** @return array<string, int> */
+    /** @return array<string, int|null> */
     private function counts(): array
     {
         $tables = [
@@ -77,23 +83,33 @@ final class SystemCenterService
         $counts = [];
 
         foreach ($tables as $label => $table) {
-            $counts[$label] = (int) $this->pdo
-                ->query(sprintf('SELECT COUNT(*) FROM `%s`', $table))
-                ->fetchColumn();
+            try {
+                $counts[$label] = (int) $this->pdo
+                    ->query(sprintf('SELECT COUNT(*) FROM `%s`', $table))
+                    ->fetchColumn();
+            } catch (Throwable) {
+                $counts[$label] = null;
+            }
         }
 
         return $counts;
     }
 
-    /** @return list<array{channel:string,line:string}> */
+    /** @return list<array{channel:string,line:string,level:string}> */
     private function recentLogs(int $perFile = 8): array
     {
         $result = [];
 
         foreach ($this->logFiles() as $file) {
             $lines = @file($file['path'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+
             foreach (array_slice($lines, -$perFile) as $line) {
-                $result[] = ['channel' => $file['channel'], 'line' => (string) $line];
+                $safeLine = $this->sanitizeLogLine((string) $line);
+                $result[] = [
+                    'channel' => $file['channel'],
+                    'line' => $safeLine,
+                    'level' => $this->detectLogLevel($safeLine),
+                ];
             }
         }
 
@@ -107,6 +123,10 @@ final class SystemCenterService
         $files = [];
 
         foreach (glob($directory . '/*.log') ?: [] as $path) {
+            if (!is_file($path) || !is_readable($path)) {
+                continue;
+            }
+
             $files[] = [
                 'channel' => pathinfo($path, PATHINFO_FILENAME),
                 'path' => $path,
@@ -118,5 +138,28 @@ final class SystemCenterService
         usort($files, static fn (array $a, array $b): int => $b['modified'] <=> $a['modified']);
 
         return $files;
+    }
+
+    private function detectLogLevel(string $line): string
+    {
+        $upper = strtoupper($line);
+
+        return match (true) {
+            str_contains($upper, 'CRITICAL'), str_contains($upper, 'ERROR') => 'error',
+            str_contains($upper, 'WARNING'), str_contains($upper, 'WARN') => 'warning',
+            default => 'info',
+        };
+    }
+
+    private function sanitizeLogLine(string $line): string
+    {
+        $patterns = [
+            '/(password|passwort|token|secret|authorization)(["\'\s:=]+)[^,}\s]+/iu',
+            '/(cookie)(["\'\s:=]+)[^,}\s]+/iu',
+        ];
+
+        $line = preg_replace($patterns, '$1$2[REDACTED]', $line) ?? $line;
+
+        return mb_substr($line, 0, 2000, 'UTF-8');
     }
 }
