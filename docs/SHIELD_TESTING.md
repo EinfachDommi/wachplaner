@@ -1,38 +1,36 @@
 # Shield Testing
 
-## S2 Rate Limiting
+## S3 Formularschutz
 
-### Migration
+### Honeypot
 
-- Tabelle `security_rate_limits` wird angelegt
-- UNIQUE-Key auf `(scope, subject_hash)` ist vorhanden
-- Guardian-Einstellungen bleiben erhalten
-- Shield-Defaults stehen in `system_settings`
-- wiederholtes Upgrade erzeugt keine Duplikate
+- leeres Honeypot-Feld wird akzeptiert
+- befülltes Honeypot-Feld wird abgelehnt
+- Array als Honeypot-Wert wird abgelehnt
+- Feld ist visuell verborgen und für Tastaturnavigation deaktiviert
 
-### RateLimiter
+### Form-Token
 
-- erster Versuch erlaubt
-- Restversuche werden korrekt reduziert
-- Fensterablauf setzt Zähler zurück
-- Überschreitung erzeugt temporäre Sperre
-- aktive Sperre liefert `retryAfterSeconds`
-- erneute Überschreitung erhöht die Sperrdauer
-- maximale Sperrdauer wird eingehalten
-- erfolgreicher Clear entfernt den Datensatz
-- Cleanup löscht nur abgelaufene alte Einträge
-- parallele Zugriffe erzeugen keinen doppelten Datensatz
-
-### Datenschutz
-
-- `subject_hash` enthält keine lesbare E-Mail oder IP
-- keine Passwörter oder Tokens werden gespeichert
-- Admin-Auswertung zeigt keine Subjekt-Hashes in öffentlichen Ansichten
+- gültiges Token wird akzeptiert
+- manipulierte Signatur wird abgelehnt
+- falsche Formular-ID wird abgelehnt
+- fehlendes Token wird abgelehnt
+- Token vor Mindestalter wird abgelehnt
+- abgelaufenes Token wird abgelehnt
+- erneut verwendetes Token wird abgelehnt
+- Token aus anderer Session wird abgelehnt
+- Cleanup entfernt abgelaufene Tokens
+- Anzahl offener Tokens ist begrenzt
 
 ### Kompatibilität
 
 - bestehender Login funktioniert unverändert
 - bestehende Registrierung funktioniert unverändert
+- Guardian-Wartung funktioniert
 - `/system` funktioniert
 - `/system/health` funktioniert
 - keine PHP-Warnings oder Stacktraces
+
+## S4-Voraussetzung
+
+Die Integration darf erst erfolgen, wenn S3 isoliert getestet ist.

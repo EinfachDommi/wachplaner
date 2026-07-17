@@ -12,25 +12,48 @@ Status: Implementiert und migriert.
 
 ## S2 – Rate Limiting
 
+Status: Implementiert und migriert.
+
+- getrennte Scopes
+- gehashte Subjekte
+- transaktionssichere Zähler
+- temporäre und eskalierende Sperren
+- Cleanup
+- Admin-Auswertung
+
+## S3 – Formularschutz
+
 Status: Implementiert, aber noch nicht in Login und Registrierung integriert.
 
 Enthalten:
 
-- getrennte Scopes
-- normalisierte und gehashte Subjekte
-- konfigurierbare Profile
-- transaktionssichere Zähler
-- temporäre Sperren
-- abgestufte Sperrdauer
-- Cleanup alter Einträge
-- Admin-Auswertung aktiver Sperren
-- sichere Standardwerte in `system_settings`
+- HoneypotGuard
+- signierte Form-Tokens
+- Mindestdauer zwischen Darstellung und Absenden
+- maximale Gültigkeitsdauer
+- einmalige Token-Verwendung
+- Session-basierter Replay-Schutz
+- Cleanup abgelaufener Tokens
+- zentraler FormProtectionService
+- Factory für Konfigurationswerte
+
+## Sicherheitsverhalten
+
+- Ein befülltes Honeypot-Feld wird abgelehnt.
+- Ein zu schnell abgesendetes Formular wird abgelehnt.
+- Ein abgelaufenes Token wird abgelehnt.
+- Ein erneut verwendetes Token wird als Replay abgelehnt.
+- Tokens sind HMAC-signiert.
+- Der geheime Schlüssel wird niemals im Formular ausgegeben.
 
 ## Nächster Schritt
 
-Shield S3:
+Shield S4:
 
-- HoneypotGuard
-- signierte Formularzeit
-- Replay-Vorbereitung
-- sichere Integration in Registrierungsformulare
+- Integration in Login
+- Integration in Registrierung
+- Rate-Limit-Verknüpfung
+- Audit Events
+- generische Fehlermeldungen
+- Session-Regeneration
+- AdminLTE-Sicherheitsübersicht
