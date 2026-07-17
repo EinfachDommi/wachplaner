@@ -2,32 +2,35 @@
 
 ## S1 – Sicherheitskern
 
-Status: Implementiert, aber noch nicht in Login oder Registrierung integriert.
-
-Enthalten:
+Status: Implementiert und migriert.
 
 - Request-ID
 - SecurityContext
 - SecurityEvent
 - SecurityAuditLogger
 - RegistrationPolicy
-- Security-Audit-Migration
-- Registrierungsmodus in `system_settings`
 
-## Sicherheitsregeln
+## S2 – Rate Limiting
 
-- Keine Passwörter, Tokens, Cookies oder CSRF-Werte im Audit Log
-- Netzwerk- und Benutzerbezüge nur gehasht
-- Audit-Fehler brechen Requests nicht ab
-- Wartungsmodus erzwingt deaktivierte Registrierung
-- Standardmodus nach Upgrade: `disabled`
+Status: Implementiert, aber noch nicht in Login und Registrierung integriert.
+
+Enthalten:
+
+- getrennte Scopes
+- normalisierte und gehashte Subjekte
+- konfigurierbare Profile
+- transaktionssichere Zähler
+- temporäre Sperren
+- abgestufte Sperrdauer
+- Cleanup alter Einträge
+- Admin-Auswertung aktiver Sperren
+- sichere Standardwerte in `system_settings`
 
 ## Nächster Schritt
 
-Shield S2:
+Shield S3:
 
-- RateLimiter
-- RateLimitRepository
-- Login- und Registrierungsprofile
-- temporäre Sperren
-- Cleanup-Strategie
+- HoneypotGuard
+- signierte Formularzeit
+- Replay-Vorbereitung
+- sichere Integration in Registrierungsformulare
