@@ -35,8 +35,10 @@
                 <i class="bi bi-box-arrow-in-right me-2"></i>Anmelden
             </button>
         </form>
-        <p class="text-center small mt-4 mb-0">
-            Noch keine Installation? <a href="/register">Ersten Admin anlegen</a>
-        </p>
+        <?php if (!empty($registrationAvailable)): ?>
+            <p class="text-center small mt-4 mb-0">
+                Noch keine Installation? <a href="/register">Ersten Admin anlegen</a>
+            </p>
+        <?php endif; ?>
     </div>
 </div>

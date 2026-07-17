@@ -98,3 +98,16 @@ Ziel: Atlas vor neuen Features weiter härten.
 - [x] Dark-Mode-Vorbereitung
 - [ ] DEV-Abnahmetest
 - [ ] Atlas nach erfolgreichem Test abschließen
+
+
+## V0.2.2 Guardian
+
+Status: Implementiert, DEV-Abnahme ausstehend.
+
+- administrativer Wartungsmodus
+- automatischer Datenbank-Failover
+- Circuit Breaker
+- Recovery-Erkennung
+- Health-Endpunkt
+- statische 503-Seite
+- system_settings Migration

@@ -1,3 +1,24 @@
+# Changelog
+
+## 0.2.2 – Guardian
+
+### Added
+
+- administrativer Wartungsmodus in AdminLTE
+- automatischer DB-Failover mit statischer 503-Seite
+- lokaler Circuit Breaker und Recovery-Erkennung
+- Health-Endpunkt `/system/health`
+- System- und Recovery-Logging
+- ENV-Notfall-Override
+- zentrale `system_settings`
+- Atlas Roadmap und Maintenance ADR
+
+### Changed
+
+- Registrierung wird während Wartung vollständig gesperrt
+- `/system` verwaltet Betriebszustand und Wartung
+- Session-Cookies werden zentral gehärtet
+- Version auf 0.2.2 Guardian angehoben
 
 ## V0.2.0-dev Sprint 1 Core Foundation
 
