@@ -43,3 +43,13 @@
 
         <div class="app-content">
             <div class="container-fluid">
+                <?php if (isset($manualState) && $manualState instanceof \Wachplaner\Core\System\MaintenanceState && $manualState->isManual()): ?>
+                    <div class="alert alert-warning d-flex align-items-center justify-content-between gap-3" role="alert">
+                        <div>
+                            <i class="bi bi-cone-striped me-2"></i>
+                            <strong>Wartungsmodus aktiv.</strong>
+                            Die Anwendung ist nur für Administratoren freigegeben.
+                        </div>
+                        <a class="btn btn-sm btn-outline-dark" href="/system">Wartung verwalten</a>
+                    </div>
+                <?php endif; ?>

@@ -1,6 +1,7 @@
 {
-    "version": "0.2.1",
-    "codename": "Atlas UI",
-    "build": "20260711.003",
-    "branch": "develop"
+  "version": "0.2.2",
+  "codename": "Guardian",
+  "build": "20260717.001",
+  "branch": "release/v0.2.2",
+  "updated_at": "2026-07-17T00:00:00+02:00"
 }

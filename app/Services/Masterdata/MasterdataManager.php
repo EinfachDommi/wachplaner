@@ -1,26 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Wachplaner\Services\Masterdata;
 
 use InvalidArgumentException;
 use PDO;
+use Throwable;
 use Wachplaner\Services\Logging\Logger;
 
 final class MasterdataManager
 {
     private array $importers;
     private ImportLogger $importLogger;
+    private Validator $validator;
 
-    public function __construct(private PDO $pdo)
+    public function __construct(private readonly PDO $pdo)
     {
         $reader = new SimpleXlsxReader();
+
         $this->importers = [
             'vehicles' => new VehicleImporter($pdo, $reader),
             'trainings' => new TrainingImporter($pdo, $reader),
             'extensions' => new ExtensionImporter($pdo, $reader),
             'building_costs' => new BuildingCostImporter($pdo, $reader),
         ];
-        $this->importLogger = new ImportLogger($pdo, new Logger(__DIR__ . '/../../../storage/logs'));
+
+        $logger = new Logger(__DIR__ . '/../../../storage/logs');
+        $this->importLogger = new ImportLogger($pdo, $logger);
+        $this->validator = new Validator();
     }
 
     public function importers(): array
@@ -33,12 +41,30 @@ final class MasterdataManager
         if (!isset($this->importers[$key])) {
             throw new InvalidArgumentException('Unbekannter Import-Typ: ' . $key);
         }
+
         return $this->importers[$key];
     }
 
     public function import(string $key, string $filePath, ?string $fileName = null): ImportResult
     {
-        $result = $this->importer($key)->import($filePath);
+        $validationErrors = $this->validator->validateImportFile($filePath, $fileName);
+
+        if ($validationErrors !== []) {
+            $result = new ImportResult($key);
+            foreach ($validationErrors as $error) {
+                $result->addError($error);
+            }
+            $this->importLogger->log($result, $fileName);
+            return $result;
+        }
+
+        try {
+            $result = $this->importer($key)->import($filePath);
+        } catch (Throwable $exception) {
+            $result = new ImportResult($key);
+            $result->addError('Der Import konnte nicht ausgeführt werden: ' . $exception->getMessage());
+        }
+
         $this->importLogger->log($result, $fileName);
         return $result;
     }
@@ -51,11 +77,30 @@ final class MasterdataManager
     public function counts(): array
     {
         return [
-            'vehicle_types' => (int)$this->pdo->query('SELECT COUNT(*) FROM vehicle_types')->fetchColumn(),
-            'training_types' => (int)$this->pdo->query('SELECT COUNT(*) FROM training_types')->fetchColumn(),
-            'training_vehicle_requirements' => (int)$this->pdo->query('SELECT COUNT(*) FROM training_vehicle_requirements')->fetchColumn(),
-            'extensions' => (int)$this->pdo->query('SELECT COUNT(*) FROM expansions')->fetchColumn(),
-            'building_costs' => (int)$this->pdo->query('SELECT COUNT(*) FROM station_build_costs')->fetchColumn(),
+            'vehicle_types' => $this->countTableRows('vehicle_types'),
+            'training_types' => $this->countTableRows('training_types'),
+            'training_vehicle_requirements' => $this->countTableRows('training_vehicle_requirements'),
+            'extensions' => $this->countTableRows('expansions'),
+            'building_costs' => $this->countTableRows('station_build_costs'),
         ];
+    }
+
+    private function countTableRows(string $table): int
+    {
+        $allowedTables = [
+            'vehicle_types',
+            'training_types',
+            'training_vehicle_requirements',
+            'expansions',
+            'station_build_costs',
+        ];
+
+        if (!in_array($table, $allowedTables, true)) {
+            throw new InvalidArgumentException('Unzulässige Tabelle für Stammdatenzählung.');
+        }
+
+        return (int) $this->pdo
+            ->query(sprintf('SELECT COUNT(*) FROM `%s`', $table))
+            ->fetchColumn();
     }
 }

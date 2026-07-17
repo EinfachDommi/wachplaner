@@ -1,8 +1,6 @@
 <?php
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+declare(strict_types=1);
 
 define('WACHPLANER_ROOT', dirname(__DIR__, 2));
 
@@ -15,14 +13,27 @@ require_once __DIR__ . '/helpers.php';
 ErrorHandler::register(WACHPLANER_ROOT);
 Config::load(WACHPLANER_ROOT);
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => (bool) Config::get('session.secure', true),
+        'httponly' => true,
+        'samesite' => (string) Config::get('session.same_site', 'Lax'),
+    ]);
+    session_start();
+}
+
 spl_autoload_register(static function (string $class): void {
     $prefix = 'Wachplaner\\';
+
     if (!str_starts_with($class, $prefix)) {
         return;
     }
 
     $relative = substr($class, strlen($prefix));
     $file = __DIR__ . '/../' . str_replace('\\', '/', $relative) . '.php';
+
     if (is_file($file)) {
         require_once $file;
     }

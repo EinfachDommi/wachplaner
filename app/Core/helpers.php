@@ -50,6 +50,21 @@ function require_auth(): void
     }
 }
 
+function is_admin(): bool
+{
+    return (auth_user()['role'] ?? null) === 'admin';
+}
+
+function require_admin(): void
+{
+    require_auth();
+
+    if (!is_admin()) {
+        http_response_code(403);
+        throw new RuntimeException('Administratorrechte erforderlich.');
+    }
+}
+
 function current_path(): string
 {
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
@@ -70,7 +85,7 @@ function page_meta(string $view): array
         'projects/index' => ['title' => 'Projekte', 'subtitle' => 'Regionen und Leitstellen verwalten', 'icon' => 'bi-folder2-open'],
         'masterdata/index' => ['title' => 'Stammdaten', 'subtitle' => 'Fahrzeugtypen, Erweiterungen und Ausbildungen', 'icon' => 'bi-database'],
         'admin/masterdata/index' => ['title' => 'Stammdaten-Import', 'subtitle' => 'Excel-Dateien prüfen und importieren', 'icon' => 'bi-file-earmark-arrow-up'],
-        'system/index' => ['title' => 'Systemstatus', 'subtitle' => 'Umgebung, Datenbank und Stammdaten prüfen', 'icon' => 'bi-activity'],
+        'system/index' => ['title' => 'System & Wartung', 'subtitle' => 'Betriebszustand und Wartungsmodus verwalten', 'icon' => 'bi-shield-check'],
         'auth/login' => ['title' => 'Anmelden', 'subtitle' => '', 'icon' => 'bi-box-arrow-in-right'],
         'auth/register' => ['title' => 'Administration einrichten', 'subtitle' => '', 'icon' => 'bi-person-plus'],
         default => ['title' => 'Wachplaner', 'subtitle' => '', 'icon' => 'bi-grid'],

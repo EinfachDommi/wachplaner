@@ -1,4 +1,4 @@
-# Wachplaner V0.1 Realbau Edition
+# Wachplaner V0.2.2 – Guardian
 
 Domain: `http://wachplaner.sh-com.de`
 
@@ -54,3 +54,23 @@ V0.2: Leitstellenspiel-Login, Session-Cookie, JSON-Cache und erster API-Sync.
 5. `/system` öffnen und Systemstatus prüfen.
 
 Wichtig: `.env` muss im Projekt-Root liegen, nicht im `public/`-Ordner.
+
+
+## Guardian Upgrade
+
+1. Bestehende `.env` sichern und nicht überschreiben.
+2. Neue Variablen aus `.env.example` ergänzen.
+3. Dateien auf DEV hochladen.
+4. Als Administrator `/upgrade` öffnen.
+5. Migration `20260717_0220_guardian_system_health.sql` ausführen.
+6. `/system` öffnen und Wartungsmodus testen.
+7. `/system/health` prüfen.
+
+### Notfall-Wartung
+
+```env
+MAINTENANCE_FORCE=true
+```
+
+Diese Einstellung funktioniert auch ohne Datenbank. Nach der Fehlerbehebung muss
+sie wieder auf `false` gesetzt werden.

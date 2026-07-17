@@ -1,63 +1,151 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Wachplaner\Services\Masterdata;
 
 use PDO;
+use Throwable;
 use Wachplaner\Services\Logging\Logger;
 
 final class ImportLogger
 {
-    public function __construct(private PDO $pdo, private Logger $logger)
-    {
-        $this->ensureTable();
+    public function __construct(
+        private readonly PDO $pdo,
+        private readonly Logger $logger
+    ) {
     }
 
     public function log(ImportResult $result, ?string $fileName = null): void
     {
-        $stmt = $this->pdo->prepare('INSERT INTO masterdata_import_logs(import_type,file_name,processed,created_count,updated_count,skipped_count,error_count,errors_json,created_at) VALUES(?,?,?,?,?,?,?,?,NOW())');
-        $stmt->execute([
-            $result->type,
-            $fileName,
-            $result->processed,
-            $result->created,
-            $result->updated,
-            $result->skipped,
-            count($result->errors),
-            json_encode($result->errors, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-        ]);
+        $status = $result->status();
+        $message = $this->buildMessage($result);
 
-        $this->logger->info('Masterdata import finished', [
-            'type' => $result->type,
-            'file' => $fileName,
-            'processed' => $result->processed,
-            'created' => $result->created,
-            'updated' => $result->updated,
-            'skipped' => $result->skipped,
-            'errors' => count($result->errors),
-        ]);
+        try {
+            $statement = $this->pdo->prepare(
+                <<<'SQL'
+                INSERT INTO masterdata_import_logs (
+                    import_type,
+                    source_file,
+                    status,
+                    rows_total,
+                    rows_created,
+                    rows_updated,
+                    rows_skipped,
+                    message,
+                    created_at
+                ) VALUES (
+                    :import_type,
+                    :source_file,
+                    :status,
+                    :rows_total,
+                    :rows_created,
+                    :rows_updated,
+                    :rows_skipped,
+                    :message,
+                    NOW()
+                )
+                SQL
+            );
+
+            $statement->execute([
+                'import_type' => $result->type,
+                'source_file' => $fileName,
+                'status' => $status,
+                'rows_total' => $result->processed,
+                'rows_created' => $result->created,
+                'rows_updated' => $result->updated,
+                'rows_skipped' => $result->skipped,
+                'message' => $message,
+            ]);
+        } catch (Throwable $exception) {
+            $this->writeFileLogSafely('error', 'Masterdata import log could not be persisted', [
+                'type' => $result->type,
+                'file' => $fileName,
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+            ]);
+            return;
+        }
+
+        $this->writeFileLogSafely(
+            $status === 'error' ? 'error' : 'info',
+            'Masterdata import finished',
+            [
+                'type' => $result->type,
+                'file' => $fileName,
+                'status' => $status,
+                'processed' => $result->processed,
+                'created' => $result->created,
+                'updated' => $result->updated,
+                'skipped' => $result->skipped,
+                'errors' => count($result->errors),
+                'warnings' => count($result->warnings),
+            ]
+        );
     }
 
     public function latest(int $limit = 20): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM masterdata_import_logs ORDER BY created_at DESC, id DESC LIMIT ?');
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $limit = max(1, min($limit, 100));
+
+        $statement = $this->pdo->prepare(
+            <<<'SQL'
+            SELECT
+                id,
+                import_type,
+                source_file,
+                status,
+                rows_total,
+                rows_created,
+                rows_updated,
+                rows_skipped,
+                message,
+                created_at
+            FROM masterdata_import_logs
+            ORDER BY created_at DESC, id DESC
+            LIMIT :limit
+            SQL
+        );
+
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($rows) ? $rows : [];
     }
 
-    private function ensureTable(): void
+    private function buildMessage(ImportResult $result): string
     {
-        $this->pdo->exec("CREATE TABLE IF NOT EXISTS masterdata_import_logs (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            import_type VARCHAR(80) NOT NULL,
-            file_name VARCHAR(255) NULL,
-            processed INT NOT NULL DEFAULT 0,
-            created_count INT NOT NULL DEFAULT 0,
-            updated_count INT NOT NULL DEFAULT 0,
-            skipped_count INT NOT NULL DEFAULT 0,
-            error_count INT NOT NULL DEFAULT 0,
-            errors_json JSON NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $parts = [
+            sprintf('%d Datensätze verarbeitet.', $result->processed),
+            sprintf('%d erstellt.', $result->created),
+            sprintf('%d aktualisiert.', $result->updated),
+            sprintf('%d übersprungen.', $result->skipped),
+        ];
+
+        if ($result->errors !== []) {
+            $parts[] = sprintf('%d Fehler.', count($result->errors));
+            $parts[] = 'Fehler: ' . implode(' | ', array_slice($result->errors, 0, 5));
+        } elseif ($result->warnings !== []) {
+            $parts[] = sprintf('%d Warnungen.', count($result->warnings));
+            $parts[] = 'Warnungen: ' . implode(' | ', array_slice($result->warnings, 0, 5));
+        } else {
+            $parts[] = 'Import erfolgreich.';
+        }
+
+        return implode(' ', $parts);
+    }
+
+    private function writeFileLogSafely(string $level, string $message, array $context): void
+    {
+        try {
+            if ($level === 'error') {
+                $this->logger->error($message, $context);
+                return;
+            }
+            $this->logger->info($message, $context);
+        } catch (Throwable) {
+        }
     }
 }

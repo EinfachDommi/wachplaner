@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Wachplaner\Services\Masterdata;
 
 final class ImportResult
@@ -20,13 +22,57 @@ final class ImportResult
         return $this->errors === [];
     }
 
+    public function hasWarnings(): bool
+    {
+        return $this->warnings !== [] || $this->skipped > 0;
+    }
+
+    public function status(): string
+    {
+        if (!$this->success()) {
+            return 'error';
+        }
+
+        if ($this->hasWarnings()) {
+            return 'warning';
+        }
+
+        return 'success';
+    }
+
+    public function addProcessed(int $count = 1): void
+    {
+        $this->processed += max(0, $count);
+    }
+
+    public function addCreated(int $count = 1): void
+    {
+        $this->created += max(0, $count);
+    }
+
+    public function addUpdated(int $count = 1): void
+    {
+        $this->updated += max(0, $count);
+    }
+
+    public function addSkipped(int $count = 1): void
+    {
+        $this->skipped += max(0, $count);
+    }
+
     public function addError(string $message): void
     {
-        $this->errors[] = $message;
+        $message = trim($message);
+        if ($message !== '') {
+            $this->errors[] = $message;
+        }
     }
 
     public function addWarning(string $message): void
     {
-        $this->warnings[] = $message;
+        $message = trim($message);
+        if ($message !== '') {
+            $this->warnings[] = $message;
+        }
     }
 }
