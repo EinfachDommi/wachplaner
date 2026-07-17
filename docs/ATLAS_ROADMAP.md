@@ -1,69 +1,68 @@
 # Atlas Roadmap
 
-## Ziel
-
-Atlas stellt den stabilen, sicheren und wartbaren Anwendungskern des Wachplaners bereit.
-Bis zum Atlas-Final-Release werden keine Leitstellenspiel-Synchronisationsfunktionen
-entwickelt.
+Atlas stabilisiert den technischen Unterbau des Wachplaners. Bis zum finalen Atlas-Release werden keine Leitstellenspiel-Synchronisation und keine neuen Planungsfunktionen integriert.
 
 ## V0.2.2 – Guardian
 
-Betriebssicherheit und Wartungssteuerung:
+### Ziel
 
-- [x] Manueller Wartungsmodus über AdminLTE
-- [x] Administratorzugriff während geplanter Wartung
-- [x] Registrierung während Wartung gesperrt
-- [x] Automatischer Wartungsmodus bei Datenbankausfall
+Sicherer und nachvollziehbarer Systembetrieb.
+
+### Status
+
+- [x] Manueller Wartungsmodus
+- [x] Automatischer Datenbank-Failover
 - [x] Datenbankunabhängige 503-Seite
-- [x] Lokaler Circuit Breaker
-- [x] Automatische Recovery-Erkennung
-- [x] `/system/health`
-- [x] System- und Recovery-Logging
-- [x] ENV-Notfall-Override
-- [ ] Abnahme auf DEV
+- [x] Circuit Breaker und Recovery-Logging
+- [x] Health-Endpunkt
+- [x] Modularer System-Health-Core
+- [x] Prüfungen für Konfiguration, Datenbank, Storage, PHP-Erweiterungen und Migrationen
+- [x] Zentrale Versions- und Statusobjekte
+- [ ] Vollständige Abnahme auf DEV
+- [ ] Störung und Wiederherstellung der Datenbank testen
+- [ ] Rechte und Wartungszugriff testen
 
 ## V0.2.3 – Shield
 
-Schutz vor automatisiertem Missbrauch:
+### Ziel
 
-- [ ] Registrierungssteuerung
+Schutz vor automatisiertem Missbrauch und unberechtigten Zugriffen.
+
+- [ ] Registrierung zentral aktivierbar
 - [ ] Honeypot
-- [ ] Formular-Mindestzeit
-- [ ] Rate Limiting
-- [ ] abgestufte Login-Sperren
-- [ ] E-Mail-Verifikation
-- [ ] Sicherheits-Audit-Log
+- [ ] Mindestdauer für Formulare
+- [ ] Login- und Registrierungs-Rate-Limits
+- [ ] abgestufte Sperrzeiten
+- [ ] neutrale Authentifizierungsfehler
+- [ ] Audit-Log
+- [ ] adaptive Bot-Prüfung
 
 ## V0.2.4 – Integrity
 
-Datenintegrität und Idempotenz:
+### Ziel
 
-- [ ] fachliche UNIQUE-Constraints
+Datenintegrität und idempotente Schreibvorgänge.
+
 - [ ] normalisierte Vergleichswerte
-- [ ] Schutz vor doppeltem Absenden
-- [ ] idempotente Importe
-- [ ] Importkonflikt-Anzeige
-- [ ] Duplikat-Audit und Reparaturwerkzeug
+- [ ] eindeutige Datenbank-Constraints
+- [ ] Idempotency Keys für kritische Formulare
+- [ ] Import-Duplikatschutz
+- [ ] Konfliktberichte
+- [ ] Bereinigung vorhandener Duplikate
 
 ## V0.2.5 – Atlas Final
 
-- [ ] vollständiger Installations- und Upgrade-Test
-- [ ] Sicherheitsprüfung
-- [ ] Datenbankaudit
-- [ ] Masterdata-Kompletttest
-- [ ] Backup- und Restore-Test
+### Ziel
+
+Releasefähiges Grundsystem.
+
+- [ ] Neuinstallation
+- [ ] Upgrade von V0.1.2
+- [ ] wiederholtes Upgrade ohne Nebenwirkungen
+- [ ] alle Stammdatenimporte
+- [ ] Sicherheitsabnahme
 - [ ] responsive UI-Abnahme
-- [ ] Release Candidate
+- [ ] Backup und Restore
+- [ ] Release Candidate auf DEV
 - [ ] Merge nach `main`
 - [ ] produktives Deployment
-
-## Definition of Done
-
-Atlas gilt erst als abgeschlossen, wenn:
-
-- keine bekannten kritischen Fehler offen sind,
-- keine PHP-Warnings oder Stacktraces im Browser erscheinen,
-- Installation und Upgrade reproduzierbar funktionieren,
-- Wartungs- und Recovery-Abläufe getestet sind,
-- Logs keine Zugangsdaten oder Tokens enthalten,
-- alle Atlas-Dokumente aktuell sind.

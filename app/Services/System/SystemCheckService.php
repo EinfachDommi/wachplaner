@@ -5,7 +5,13 @@ declare(strict_types=1);
 namespace Wachplaner\Services\System;
 
 use PDO;
-use Throwable;
+use Wachplaner\Core\System\Health\CheckResult;
+use Wachplaner\Core\System\Health\ConfigCheck;
+use Wachplaner\Core\System\Health\DatabaseCheck;
+use Wachplaner\Core\System\Health\HealthCheck;
+use Wachplaner\Core\System\Health\MigrationCheck;
+use Wachplaner\Core\System\Health\PhpExtensionCheck;
+use Wachplaner\Core\System\Health\StorageCheck;
 
 final class SystemCheckService
 {
@@ -14,125 +20,42 @@ final class SystemCheckService
     }
 
     /**
-     * @return list<array{label:string,value:string,ok:bool,level:string}>
+     * Backward-compatible result for the existing AdminLTE system view.
+     *
+     * @return list<array{key:string,label:string,value:string,ok:bool,level:string,critical:bool,meta:array<string, scalar|null>}>
      */
     public function checks(?PDO $pdo = null): array
     {
-        $checks = [
-            $this->check(
+        $staticResults = [
+            CheckResult::ok(
+                'version',
                 'Wachplaner Version',
-                (string) \Config::get('version.number') . ' ' . (string) \Config::get('version.codename'),
-                true
+                trim((string) \Config::get('version.number') . ' ' . (string) \Config::get('version.codename'))
             ),
-            $this->check('Build', (string) \Config::get('version.build'), true),
-            $this->check('Umgebung', (string) \Config::get('app_env'), true),
-            $this->check(
-                '.env gefunden',
-                \EnvLoader::exists($this->rootPath) ? 'ja' : 'nein',
-                \EnvLoader::exists($this->rootPath)
-            ),
-            $this->check(
-                'Pflicht-Konfiguration',
-                $this->missingConfigLabel(),
-                \Config::missing(['db.host', 'db.name', 'db.user']) === []
-            ),
-            $this->check(
-                'PHP Version',
-                PHP_VERSION,
-                version_compare(PHP_VERSION, '8.1.0', '>=')
-            ),
-            $this->extensionCheck('PDO MySQL', 'pdo_mysql'),
-            $this->extensionCheck('DOM/XML', 'dom'),
-            $this->extensionCheck('SimpleXML', 'simplexml'),
-            $this->extensionCheck('ZIP', 'zip'),
-            $this->extensionCheck('mbstring', 'mbstring'),
-            $this->extensionCheck('OpenSSL', 'openssl'),
-            $this->storageCheck(),
-            $this->check(
-                'HTTPS',
-                $this->isHttps() ? 'aktiv' : 'nicht erkannt',
-                $this->isHttps()
-            ),
+            CheckResult::ok('build', 'Build', (string) \Config::get('version.build')),
+            CheckResult::ok('environment', 'Umgebung', (string) \Config::get('app_env')),
+            version_compare(PHP_VERSION, '8.1.0', '>=')
+                ? CheckResult::ok('php_version', 'PHP Version', PHP_VERSION, true)
+                : CheckResult::error('php_version', 'PHP Version', PHP_VERSION . ' ist zu alt'),
+            $this->isHttps()
+                ? CheckResult::ok('https', 'HTTPS', 'aktiv', true)
+                : CheckResult::warning('https', 'HTTPS', 'nicht erkannt', true),
         ];
 
-        if ($pdo instanceof PDO) {
-            try {
-                $ok = (int) $pdo->query('SELECT 1')->fetchColumn() === 1;
-                $checks[] = $this->check(
-                    'Datenbankverbindung',
-                    $ok ? 'OK' : 'Fehler',
-                    $ok
-                );
-            } catch (Throwable) {
-                $checks[] = $this->check('Datenbankverbindung', 'Fehler', false);
-            }
-        }
+        $healthCheck = new HealthCheck([
+            new ConfigCheck($this->rootPath),
+            new PhpExtensionCheck(),
+            new StorageCheck($this->rootPath),
+            new DatabaseCheck($pdo),
+            new MigrationCheck($pdo, $this->rootPath . '/database/upgrades'),
+        ]);
 
-        return $checks;
-    }
+        $results = array_merge($staticResults, $healthCheck->run());
 
-    private function check(string $label, string $value, bool $ok): array
-    {
-        return [
-            'label' => $label,
-            'value' => $value,
-            'ok' => $ok,
-            'level' => $ok ? 'ok' : 'error',
-        ];
-    }
-
-    private function storageCheck(): array
-    {
-        $ok = $this->storageWriteTest();
-
-        return $this->check(
-            'Storage Schreibtest',
-            $ok ? 'erfolgreich' : 'fehlgeschlagen',
-            $ok
+        return array_map(
+            static fn (CheckResult $result): array => $result->toArray(),
+            $results
         );
-    }
-
-    private function extensionCheck(string $label, string $extension): array
-    {
-        $loaded = extension_loaded($extension);
-
-        return $this->check(
-            $label,
-            $loaded ? 'verfügbar' : 'nicht verfügbar',
-            $loaded
-        );
-    }
-
-    private function missingConfigLabel(): string
-    {
-        $missing = \Config::missing(['db.host', 'db.name', 'db.user']);
-
-        return $missing === []
-            ? 'vollständig'
-            : 'fehlt: ' . implode(', ', $missing);
-    }
-
-    private function storageWriteTest(): bool
-    {
-        $directory = $this->rootPath . '/storage/system';
-
-        if (!is_dir($directory) && !@mkdir($directory, 0775, true)) {
-            return false;
-        }
-
-        $testFile = $directory . '/.system-check-' . bin2hex(random_bytes(4));
-
-        try {
-            if (@file_put_contents($testFile, 'ok', LOCK_EX) === false) {
-                return false;
-            }
-
-            return @file_get_contents($testFile) === 'ok';
-        } finally {
-            if (is_file($testFile)) {
-                @unlink($testFile);
-            }
-        }
     }
 
     private function isHttps(): bool
