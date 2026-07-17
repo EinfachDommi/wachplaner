@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.2-dev – Guardian System Center
+
+### Added
+- Administrative and automatic maintenance modes
+- Database-independent HTTP 503 failover
+- Circuit breaker and recovery detection
+- Modular health checks
+- Guardian System Center
+- Central settings and prepared feature flags
+
+### Fixed
+- Masterdata import log schema compatibility
+- Masterdata history view compatibility
+- XLSX namespace handling
+
 ## 0.2.2 – Guardian
 
 ### Added

@@ -1,113 +1,32 @@
-# Wachplaner
+# Wachplaner – Projektstatus
 
-Realbau Planungs- und Controllingsystem für Leitstellenspiel.de.
+## Aktueller Stand
 
-## Aktuelle stabile Basis
+- Produktiv: V0.1.2 auf `main`
+- Entwicklung: V0.2.2-dev Guardian auf `develop`
+- Entwicklungsserver: `https://dev.wachplaner.sh-com.de`
+- nächster Meilenstein: V0.2.3 Shield
 
-Version: 0.1.2
+## Guardian abgeschlossen bzw. integriert
 
-## Aktueller Entwicklungszweig
+- geplanter Wartungsmodus über das AdminLTE-System-Center
+- Registrierungssperre während Wartung
+- Adminzugriff während geplanter Wartung
+- automatischer DB-Failover mit HTTP 503
+- Circuit Breaker und Recovery-Erkennung
+- lokales System-Logging
+- modulares Health-Check-System
+- System-Center mit Health, Wartung, Logs, Updates, Sicherheit und Einstellungen
+- vorbereitete Feature Flags
+- stabilisierter Masterdata- und XLSX-Import
 
-Version: 0.2.0-dev
+## Atlas-Roadmap
 
-## Fokus 0.2.0
+- V0.2.2 Guardian: Systembetrieb und Wartung
+- V0.2.3 Shield: Anti-Spam und Authentifizierungsschutz
+- V0.2.4 Integrity: Datenintegrität und Duplikatschutz
+- V0.2.5 Atlas Final: Release Candidate und Produktivdeployment
 
-- Dokumentation professionalisieren
-- Service-Struktur vorbereiten
-- LSS-Login und Sessionverwaltung planen
-- JSON-Cache vorbereiten
-- Sync-Logging vorbereiten
+## Entwicklungsregel
 
-## Nicht-Ziel
-
-Dienstplanung ist kein Bestandteil des Projekts.
-
-
-## Aktueller Sprint: Core Foundation
-
-Ziel: Repository und Codebasis für die Entwicklung ab V0.2 professionalisieren.
-
-### Erledigt
-
-- GitHub Templates vorbereitet.
-- Coding Guidelines ergänzt.
-- Architecture Decisions eingeführt.
-- Systemstatus-Seite ergänzt.
-- CLI-Systemcheck ergänzt.
-- Logging-Service vorbereitet.
-
-### Nächster Sprint
-
-Masterdata-Importer und Planning-Service vorbereiten.
-
-## Aktueller Sprint: Sprint 2 – Atlas / Masterdata Foundation
-
-Ziel: Stammdaten werden künftig über Importer gepflegt. Die Excel-Dateien für Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten werden zur fachlichen Quelle der Stammdaten.
-
-### Erledigt in diesem Zwischenstand
-
-- Masterdata-Service-Struktur
-- XLSX-Reader
-- Importer-Klassen
-- Admin-Importseite
-- CLI-Import
-- Import-Logging
-- Dokumentation der Architekturentscheidungen
-
-## Aktueller Fokus: V0.2.1 Atlas Hotfix
-
-Ziel: Atlas stabilisieren, bevor neue Features wie die Leitstellenspiel-Synchronisation gebaut werden.
-
-### Erledigt
-- EnvLoader eingeführt
-- Config-Klasse eingeführt
-- Datenbankfehler abgefangen
-- zentrale Fehlerseite ergänzt
-- Upgrade-Migration für Versionsmetadaten ergänzt
-
-### Nächste Prüfung auf DEV
-- `.env` auf DEV mit `.env.example` abgleichen
-- `/upgrade` ausführen
-- `/system` prüfen
-
-## V0.2.1 Atlas Quality Layer
-
-Ziel: Atlas vor neuen Features weiter härten.
-
-### Erledigt
-- `DB_PORT` in Datenbankverbindung aufgenommen.
-- Fehler-ID für ErrorHandler ergänzt.
-- Mehrkanal-Logger ergänzt.
-- Upgrade-Logging ergänzt.
-- SystemCheckService eingeführt.
-- Qualitätsdokumentation ergänzt.
-- Known-Bugs-Liste eingeführt.
-
-### DEV-Abnahme
-- `/system` prüfen.
-- `/upgrade` erneut ausführen.
-- `storage/logs/upgrade.log` prüfen.
-- Fehlerseite optional durch fehlerhafte `.env` auf DEV testen und danach `.env` wieder korrigieren.
-
-## Atlas UI Refactoring
-
-- [x] Bootstrap 5.3 / AdminLTE 4 Grundlayout
-- [x] Responsive Sidebar und Navbar
-- [x] Dashboard-Widgets
-- [x] Auth-Layout
-- [x] Dark-Mode-Vorbereitung
-- [ ] DEV-Abnahmetest
-- [ ] Atlas nach erfolgreichem Test abschließen
-
-
-## V0.2.2 Guardian
-
-Status: Implementiert, DEV-Abnahme ausstehend.
-
-- administrativer Wartungsmodus
-- automatischer Datenbank-Failover
-- Circuit Breaker
-- Recovery-Erkennung
-- Health-Endpunkt
-- statische 503-Seite
-- system_settings Migration
+Bis Atlas Final werden systemrelevante Funktionen additiv und rückwärtskompatibel ergänzt. Bestehende, stabile Klassen oder Namespaces werden nicht ohne zwingenden Grund verschoben.

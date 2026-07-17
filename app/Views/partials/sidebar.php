@@ -53,7 +53,7 @@
                 <li class="nav-header">ADMINISTRATION</li>
                 <li class="nav-item">
                     <a href="/system" class="nav-link <?= nav_active('/system') ?>">
-                        <i class="nav-icon bi bi-shield-check"></i><p>System & Wartung</p>
+                        <i class="nav-icon bi bi-shield-check"></i><p>System-Center</p>
                     </a>
                 </li>
                 <li class="nav-item">

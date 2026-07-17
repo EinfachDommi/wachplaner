@@ -1,76 +1,58 @@
-# Wachplaner V0.2.2 – Guardian
+# Wachplaner V0.2.2-dev – Guardian
 
-Domain: `http://wachplaner.sh-com.de`
+Realbau-Planungs- und Controllingsystem für Leitstellenspiel.de.
 
-Diese Version ist die erste saubere Realbau-Codebasis für die Planung von Wachen, Fahrzeugen, Erweiterungen, Baukosten und Ausbildungen für Leitstellenspiel.de.
+## Umgebungen
+
+- Produktion: `https://wachplaner.sh-com.de` (`main`)
+- Entwicklung: `https://dev.wachplaner.sh-com.de` (`develop`)
+
+Dieser Stand ist die aktuelle Entwicklungsbasis. Er ist noch kein finales Guardian-Release.
 
 ## Enthalten
 
-- PHP/PDO Grundsystem ohne Framework-Zwang
-- Login/Register mit `password_hash()` und `password_verify()`
-- CSRF-Schutz
-- Projektverwaltung mit benannter Leitstelle je Projekt
-- Stammdaten direkt in MySQL importierbar
-- Fahrzeugtypen: 201 Datensätze
-- Ausbildungen: 12 Zuordnungen
-- Erweiterungen: 68 Datensätze
-- Baukosten bis 10.000 Wachen: 80000 Preiszeilen
-- Dashboard und Stammdatenansicht
+- PHP/PDO-Grundsystem mit Login, CSRF-Schutz und Projektverwaltung
+- Bootstrap 5.3 und AdminLTE 4
+- Masterdata-Importer für Fahrzeugtypen, Ausbildungen, Erweiterungen und Baukosten
+- Upgrade- und Migrationssystem
+- Guardian-Wartungsmodus mit Adminzugang
+- automatischer 503-Failover bei Datenbankausfall
+- Circuit Breaker und Recovery-Erkennung
+- modulares Health-Check-System
+- System-Center mit Übersicht, Health, Wartung, Logs, Updates, Sicherheit und Einstellungen
+- vorbereitete Feature Flags
 
-## Installation
+## Bestehende Installation aktualisieren
 
-1. Dateien auf den Webspace hochladen.
-2. Entweder den DocumentRoot direkt auf `public/` setzen **oder** das Projekt unverändert hochladen; die neue Root-`.htaccess` leitet automatisch nach `public/` weiter.
-3. Datenbankdaten in `config/config.php` anpassen oder Umgebungsvariablen setzen.
-4. `http://wachplaner.sh-com.de/install` öffnen. Falls der Server den DocumentRoot direkt auf `public/` setzt, funktioniert derselbe Pfad ebenfalls.
-5. Datenbank installieren/aktualisieren.
-6. Danach unter `/register` den ersten Admin-Benutzer anlegen.
+1. Datenbank und Dateien sichern.
+2. Patch pfadtreu auf die DEV-Installation kopieren.
+3. Bestehende `.env` nicht überschreiben.
+4. Fehlende Variablen aus `.env.example` ergänzen.
+5. Als Administrator `https://dev.wachplaner.sh-com.de/upgrade` aufrufen.
+6. Danach `/system` und `/system/health` prüfen.
 
-## .htaccess / Public-Root
+## Neuinstallation
 
-Das Projekt enthält jetzt zwei `.htaccess`-Dateien:
+1. Vollständiges Projekt auf den Webspace laden.
+2. `.env.example` nach `.env` kopieren und konfigurieren.
+3. DocumentRoot auf `public/` setzen oder die Root-`.htaccess` verwenden.
+4. `/install` aufrufen.
 
-- `/.htaccess` leitet alle Anfragen intern auf `public/index.php` weiter.
-- `/public/.htaccess` übernimmt das Routing innerhalb der Anwendung.
-
-Damit kann die Anwendung auch dann unter `http://wachplaner.sh-com.de` laufen, wenn der Webspace-DocumentRoot nicht direkt auf den Ordner `public/` gesetzt werden kann.
-
-## CLI-Installation
-
-```bash
-php scripts/migrate.php
-```
-
-## Nächste Version
-
-V0.2: Leitstellenspiel-Login, Session-Cookie, JSON-Cache und erster API-Sync.
-
-## Upgrade auf V0.2.1 Atlas Hotfix
-
-1. Dateien auf `dev.wachplaner.sh-com.de` hochladen.
-2. Bestehende `.env` nicht überschreiben.
-3. `.env` mit `.env.example` abgleichen.
-4. `/upgrade` öffnen und Migrationen ausführen.
-5. `/system` öffnen und Systemstatus prüfen.
-
-Wichtig: `.env` muss im Projekt-Root liegen, nicht im `public/`-Ordner.
-
-
-## Guardian Upgrade
-
-1. Bestehende `.env` sichern und nicht überschreiben.
-2. Neue Variablen aus `.env.example` ergänzen.
-3. Dateien auf DEV hochladen.
-4. Als Administrator `/upgrade` öffnen.
-5. Migration `20260717_0220_guardian_system_health.sql` ausführen.
-6. `/system` öffnen und Wartungsmodus testen.
-7. `/system/health` prüfen.
-
-### Notfall-Wartung
+## Guardian-Konfiguration
 
 ```env
-MAINTENANCE_FORCE=true
+MAINTENANCE_FORCE=false
+MAINTENANCE_MESSAGE="Der Wachplaner wird aktuell gewartet."
+MAINTENANCE_RETRY_SECONDS=30
+REGISTRATION_ENABLED=true
+SESSION_SECURE=true
+SESSION_SAME_SITE=Lax
 ```
 
-Diese Einstellung funktioniert auch ohne Datenbank. Nach der Fehlerbehebung muss
-sie wieder auf `false` gesetzt werden.
+`MAINTENANCE_FORCE=true` aktiviert eine datenbankunabhängige Notfall-Wartungsseite.
+
+## Nächste Atlas-Schritte
+
+- V0.2.3 Shield: Anti-Spam, Rate Limiting und Registrierungsschutz
+- V0.2.4 Integrity: Duplikatschutz und Idempotenz
+- V0.2.5 Atlas Final: vollständige Abnahme und Produktivrelease

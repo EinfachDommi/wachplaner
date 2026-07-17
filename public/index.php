@@ -286,30 +286,29 @@ if ($path === '/projects/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($path === '/system') {
     require_admin();
 
-    $systemCheck = new \Wachplaner\Services\System\SystemCheckService(WACHPLANER_ROOT);
-    $checks = $systemCheck->checks($pdo);
-    $counts = [
-        'Fahrzeugtypen' => (int) $pdo->query('SELECT COUNT(*) FROM vehicle_types')->fetchColumn(),
-        'Ausbildungen' => (int) $pdo->query('SELECT COUNT(*) FROM training_types')->fetchColumn(),
-        'Erweiterungen' => (int) $pdo->query('SELECT COUNT(*) FROM expansions')->fetchColumn(),
-        'Baukosten' => (int) $pdo->query('SELECT COUNT(*) FROM station_build_costs')->fetchColumn(),
-        'Projekte' => (int) $pdo->query('SELECT COUNT(*) FROM projects')->fetchColumn(),
-    ];
-    $maintenanceSettings = $maintenance->settings($pdo);
-    $localMaintenanceState = $maintenance->localState();
-    $saved = isset($_GET['saved']);
-
-    view(
-        'system/index',
-        compact(
-            'checks',
-            'counts',
-            'maintenanceSettings',
-            'manualState',
-            'localMaintenanceState',
-            'saved'
-        )
+    $settingRepository = new \Wachplaner\Core\Settings\SettingRepository($pdo);
+    $settingsService = new \Wachplaner\Core\Settings\SettingsService($settingRepository);
+    $featureFlagService = new \Wachplaner\Core\Settings\FeatureFlagService($settingRepository);
+    $systemCenter = new \Wachplaner\Services\System\SystemCenterService(
+        WACHPLANER_ROOT,
+        $pdo,
+        $maintenance,
+        $settingsService,
+        $featureFlagService
     );
+    $systemData = $systemCenter->data();
+    extract($systemData, EXTR_SKIP);
+
+    $activeTab = (string) ($_GET['tab'] ?? 'overview');
+    $saved = isset($_GET['saved']);
+    $saveError = $_SESSION['system_save_error'] ?? null;
+    unset($_SESSION['system_save_error']);
+
+    view('system/index', compact(
+        'checks', 'healthSummary', 'counts', 'maintenanceSettings',
+        'manualState', 'localMaintenanceState', 'systemSettings',
+        'featureFlags', 'logs', 'logFiles', 'activeTab', 'saved', 'saveError'
+    ));
     exit;
 }
 
@@ -330,6 +329,46 @@ if ($path === '/system/maintenance' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     redirect('/system?saved=1');
+}
+
+if ($path === '/system/settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_admin();
+    csrf_verify();
+
+    $timezone = trim((string) ($_POST['app_timezone'] ?? 'Europe/Berlin'));
+    $locale = trim((string) ($_POST['app_locale'] ?? 'de_DE'));
+
+    try {
+        if (!in_array($timezone, timezone_identifiers_list(), true)) {
+            throw new InvalidArgumentException('Ungültige Zeitzone.');
+        }
+        if (!preg_match('/^[a-z]{2}_[A-Z]{2}$/', $locale)) {
+            throw new InvalidArgumentException('Ungültiges Locale-Format.');
+        }
+
+        $repository = new \Wachplaner\Core\Settings\SettingRepository($pdo);
+        $service = new \Wachplaner\Core\Settings\SettingsService($repository);
+        $service->save([
+            'app_timezone' => $timezone,
+            'app_locale' => $locale,
+        ], (int) auth_user()['id']);
+        redirect('/system?tab=settings&saved=1');
+    } catch (Throwable $exception) {
+        $_SESSION['system_save_error'] = $exception->getMessage();
+        redirect('/system?tab=settings');
+    }
+}
+
+if ($path === '/system/feature-flags' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_admin();
+    csrf_verify();
+
+    $repository = new \Wachplaner\Core\Settings\SettingRepository($pdo);
+    $service = new \Wachplaner\Core\Settings\FeatureFlagService($repository);
+    $submitted = is_array($_POST['flags'] ?? null) ? $_POST['flags'] : [];
+    $service->save(array_map(static fn ($value): bool => (bool) $value, $submitted), (int) auth_user()['id']);
+
+    redirect('/system?tab=security&saved=1');
 }
 
 if ($path === '/admin/masterdata') {
